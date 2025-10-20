@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Калькулятор зарплаты | Самокат Про</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        }
+
+        :root {
+            --primary: #FF3D00;
+            --primary-dark: #E03500;
+            --secondary: #00A3FF;
+            --dark: #1A1A1A;
+            --light: #FFFFFF;
+            --gray: #F5F5F5;
+            --gray-dark: #E0E0E0;
+            --success: #4CAF50;
+            --shadow: 0 8px 24px rgba(0,0,0,0.1);
+        }
+
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .container {
+            max-width: 400px;
+            width: 100%;
+        }
+
+        .app-card {
+            background: var(--light);
+            border-radius: 24px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+        }
+
+        .header {
+            background: var(--primary);
+            padding: 30px 20px;
+            text-align: center;
+            position: relative;
+        }
+
+        .logo {
+            font-size: 28px;
+            font-weight: 800;
+            color: var(--light);
+            margin-bottom: 8px;
+            letter-spacing: 1px;
+        }
+
+        .logo-subtitle {
+            color: rgba(255,255,255,0.9);
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .content {
+            padding: 30px 25px;
+        }
+
+        .section {
+            margin-bottom: 30px;
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--dark);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-title::before {
+            content: "";
+            width: 4px;
+            height: 20px;
+            background: var(--primary);
+            border-radius: 2px;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--dark);
+            margin-bottom: 8px;
+        }
+
+        .input-field {
+            width: 100%;
+            padding: 16px;
+            border: 2px solid var(--gray-dark);
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            background: var(--light);
+        }
+
+        .input-field:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(255,61,0,0.1);
+        }
+
+        .slider-container {
+            padding: 10px 0;
+        }
+
+        .slider {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 8px;
+            border-radius: 4px;
+            background: var(--gray-dark);
+            outline: none;
+        }
+
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: var(--primary);
+            cursor: pointer;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+        }
+
+        .slider::-webkit-slider-thumb:hover {
+            transform: scale(1.1);
+            background: var(--primary-dark);
+        }
+
+        .slider-value {
+            text-align: center;
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--primary);
+            margin-top: 10px;
+        }
+
+        .toggle-group {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px;
+            background: var(--gray);
+            border-radius: 12px;
+            margin-bottom: 15px;
+        }
+
+        .toggle-label {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--dark);
+        }
+
+        .toggle {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 30px;
+        }
+
+        .toggle input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 34px;
+        }
+
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 22px;
+            width: 22px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .toggle-slider {
+            background-color: var(--primary);
+        }
+
+        input:checked + .toggle-slider:before {
+            transform: translateX(30px);
+        }
+
+        .calculate-btn {
+            width: 100%;
+            padding: 18px;
+            background: var(--primary);
+            color: var(--light);
+            border: none;
+            border-radius: 16px;
+            font-size: 18px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(255,61,0,0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .calculate-btn:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(255,61,0,0.4);
+        }
+
+        .calculate-btn:active {
+            transform: translateY(0);
+        }
+
+        .result {
+            margin-top: 30px;
+            padding: 25px;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            border-radius: 20px;
+            color: var(--light);
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .result-title {
+            text-align: center;
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 20px;
+        }
+
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid rgba(255,255,255,0.3);
+        }
+
+        .result-total {
+            font-weight: 800;
+            font-size: 24px;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 2px solid rgba(255,255,255,0.5);
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .bonus-badge {
+            background: var(--success);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-left: 8px;
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 15px;
+            }
+            
+            .content {
+                padding: 20px 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="app-card">
+            <div class="header">
+                <div class="logo">САМОКАТ ПРО</div>
+                <div class="logo-subtitle">Калькулятор заработка</div>
+            </div>
+            
+            <div class="content">
+                <div class="section">
+                    <div class="section-title">Параметры работы</div>
+                    
+                    <div class="input-group">
+                        <label class="input-label">Ставка за час (руб.)</label>
+                        <input type="number" class="input-field" id="hourlyRate" min="0" value="250">
+                    </div>
+                    
+                    <div class="input-group">
+                        <label class="input-label">Ставка за заказ (руб.)</label>
+                        <input type="number" class="input-field" id="orderRate" min="0" value="150">
+                    </div>
+                    
+                    <div class="input-group">
+                        <label class="input-label">Количество заказов</label>
+                        <input type="number" class="input-field" id="ordersCount" min="0" value="0">
+                    </div>
+                    
+                    <div class="input-group">
+                        <label class="input-label">Количество часов</label>
+                        <div class="slider-container">
+                            <input type="range" min="1" max="16" value="8" class="slider" id="hoursSlider">
+                            <div class="slider-value" id="hoursValue">8 часов</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="section">
+                    <div class="section-title">Дополнительные условия</div>
+                    
+                    <div class="toggle-group">
+                        <span class="toggle-label">Погодные условия (+10р)</span>
+                        <label class="toggle">
+                            <input type="checkbox" id="weatherToggle">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                </div>
+                
+                <button class="calculate-btn" id="calculateBtn">
+                    <span>📊</span> Рассчитать заработок
+                </button>
+                
+                <div class="result" id="result">
+                    <div class="result-title">Ваш заработок</div>
+                    
+                    <div class="result-item">
+                        <span>За часы:</span>
+                        <span id="hoursIncome">0 руб.</span>
+                    </div>
+                    
+                    <div class="result-item">
+                        <span>За заказы:</span>
+                        <span id="ordersIncome">0 руб.</span>
+                    </div>
+                    
+                    <div class="result-item">
+                        <span>Доплата за погоду:</span>
+                        <span id="weatherBonus">0 руб.</span>
+                    </div>
+                    
+                    <div class="result-item">
+                        <span>Бонус за заказы:</span>
+                        <span id="ordersBonus">0 руб.</span>
+                    </div>
+                    
+                    <div class="result-total">
+                        <span>ИТОГО:</span>
+                        <span id="totalSalary">0 руб.</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Инициализация Telegram Web App
+        let tg = window.Telegram.WebApp;
+        if (tg && tg.expand) {
+            tg.expand();
+        }
+        
+        // Элементы DOM
+        const calculateBtn = document.getElementById('calculateBtn');
+        const resultDiv = document.getElementById('result');
+        const hoursSlider = document.getElementById('hoursSlider');
+        const hoursValue = document.getElementById('hoursValue');
+        const weatherToggle = document.getElementById('weatherToggle');
+        
+        // Обновление значения слайдера
+        hoursSlider.addEventListener('input', function() {
+            hoursValue.textContent = `${this.value} часов`;
+        });
+        
+        // Обработчик расчета
+        calculateBtn.addEventListener('click', function() {
+            // Получаем значения из формы
+            const hourlyRate = parseInt(document.getElementById('hourlyRate').value) || 0;
+            const orderRate = parseInt(document.getElementById('orderRate').value) || 0;
+            const ordersCount = parseInt(document.getElementById('ordersCount').value) || 0;
+            const hoursWorked = parseInt(hoursSlider.value) || 0;
+            const weatherBonus = weatherToggle.checked;
+            
+            // Расчет дохода за часы
+            const hoursIncome = hoursWorked * hourlyRate;
+            
+            // Расчет дохода за заказы
+            let ordersIncome = ordersCount * orderRate;
+            
+            // Доплата за погодные условия (+10 руб.)
+            const weatherBonusAmount = weatherBonus ? 10 : 0;
+            
+            // Бонус за большое количество заказов
+            let ordersBonus = 0;
+            if (ordersCount > 45) {
+                ordersBonus = ordersCount * 10; // +10 руб. за каждый заказ
+            }
+            
+            // Итоговый расчет
+            const totalSalary = hoursIncome + ordersIncome + weatherBonusAmount + ordersBonus;
+            
+            // Отображаем результаты
+            document.getElementById('hoursIncome').textContent = hoursIncome.toLocaleString('ru-RU') + ' руб.';
+            document.getElementById('ordersIncome').textContent = ordersIncome.toLocaleString('ru-RU') + ' руб.';
+            document.getElementById('weatherBonus').textContent = weatherBonusAmount.toLocaleString('ru-RU') + ' руб.';
+            
+            if (ordersBonus > 0) {
+                document.getElementById('ordersBonus').innerHTML = 
+                    ordersBonus.toLocaleString('ru-RU') + ' руб. <span class="bonus-badge">БОНУС</span>';
+            } else {
+                document.getElementById('ordersBonus').textContent = '0 руб.';
+            }
+            
+            document.getElementById('totalSalary').textContent = totalSalary.toLocaleString('ru-RU') + ' руб.';
+            
+            // Показываем блок с результатами
+            resultDiv.style.display = 'block';
+            
+            // Прокрутка к результатам
+            resultDiv.scrollIntoView({ behavior: 'smooth' });
+            
+            // Вибрация (если поддерживается)
+            if (navigator.vibrate) {
+                navigator.vibrate(100);
+            }
+        });
+    </script>
+</body>
+</html>
